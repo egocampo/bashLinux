@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+contador=0
+#
+#   LA PRIMER DECLARACION AL LLAMAR LA FUNCION ES EL NOMBRE DEL ARCHIVO ORIGINAL
+nombre=$1
+#
+#	LA SEGUNDA DECLARACION INDICA EN GRUPOS DE CUANTAS HOJAS SEPARAR
+separaren=$2
+#
+#   CON SED BORRO EL .PDF PARA EL ARHIVO DE SALIDA
+salida=$(echo $nombre | sed 's/.pdf//g')
+#
+#   CUENTO CUANTAS PAGINAS TIENE EL ARCHIVO
+cpag=$(pdftk $nombre dump_data | awk '/NumberOfPages/{print $2}')
+#
+#   DEFINO HASTA DONDE VA A CONTAR EL SEPARADOR PRINCIPAL
+let hasta=$cpag/separaren
+#
+#
+while [ $contador -lt $hasta ]; do
+	let inicial=separaren*$contador+1
+	let aux=$contador+1
+	let final=separaren*$aux
+	pdftk $nombre cat $inicial-$final output $salida$contador.pdf
+	let contador=contador+1
+done
+#
+#   JUNTO LAS HOJAS QUE RESTARON
+let aux2=separaren*$hasta
+let inicial2=$aux2+1
+let final2=$cpag
+pdftk $nombre cat $inicial2-$final2 output $salida$contador.pdf
